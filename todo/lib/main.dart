@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'theme.dart';
+import 'ChangeTheme.dart';
 import 'Constants.dart';
 
 void main() => runApp(new TodoApp());
@@ -8,15 +11,39 @@ void main() => runApp(new TodoApp());
 class TodoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-        theme: new ThemeData(          // Добавьте 3 строки отсюда...
-          primaryColor: Colors.black,
-        ),                             // ... до сюда.
-        debugShowCheckedModeBanner: false,
+    return ChangeNotifierProvider<ThemeChanger>(
+      builder: (_) => ThemeChanger(ThemeData.dark()),
+      child: new MaterialAppWithTheme (
 
-        title: 'Todo List',
-        home: new TodoList());
+      ),
+    );
+
+//    return new MaterialApp(
+//        theme: new ThemeData(          // Добавьте 3 строки отсюда...
+//          primaryColor: Colors.black,
+//        ),
+//// ... до сюда.
+//
+//        debugShowCheckedModeBanner: false,
+//
+//        title: 'Todo List',
+//        home: new TodoList());
   }
+}
+
+class MaterialAppWithTheme extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeChanger>(context);
+
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: new TodoList(),
+      theme: theme.getTheme(),
+    );
+  }
+
 }
 
 class TodoList extends StatefulWidget {
@@ -51,7 +78,7 @@ class TodoListState extends State<TodoList> {
       body: _buildTodoList(),
 
       floatingActionButton: new FloatingActionButton(
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.blue,
           onPressed: _addTodoItem,
           tooltip: 'Add task',
           child: new Icon(Icons.add)),
@@ -118,11 +145,9 @@ class TodoListState extends State<TodoList> {
  }
 
  void _changeTheme(){
-   Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-     return new Scaffold(
-         appBar: new AppBar(title: new Text('Тема')),
-         body: Text('тут будут темы, ожидайте...'));
-   }));
+   Navigator.push(context,
+       new MaterialPageRoute(
+           builder: (context) => new ChangeTheme()));
  }
 
 
