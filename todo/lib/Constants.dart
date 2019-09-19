@@ -1,5 +1,5 @@
 class Constants {
-  static const String ChangeTheme = 'Сменить тему';
+  static const String ChangeTheme = 'Настройки';
   static const String info = 'Информация';
   static const String OffAd = 'Отключить рекламу';
 
