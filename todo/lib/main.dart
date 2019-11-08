@@ -1,34 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'theme.dart';
 import 'ChangeTheme.dart';
 import 'Constants.dart';
 
-void main() => runApp(new TodoApp());
-
-class TodoApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ThemeChanger>(
-      builder: (_) => ThemeChanger(ThemeData.dark()),
-      child: new MaterialAppWithTheme (
-
+void main() async {
+  SharedPreferences.getInstance().then((prefs) {
+    var darkModeOn = prefs.getBool('darkMode') ?? true;
+    runApp(
+      ChangeNotifierProvider<ThemeChanger>(
+        builder: (_) =>
+            ThemeChanger(darkModeOn ? ThemeData.dark() : ThemeData.light()),
+        child: MaterialAppWithTheme(),
       ),
     );
-
-//    return new MaterialApp(
-//        theme: new ThemeData(          // Добавьте 3 строки отсюда...
-//          primaryColor: Colors.black,
-//        ),
-//// ... до сюда.
-//
-//        debugShowCheckedModeBanner: false,
-//
-//        title: 'Todo List',
-//        home: new TodoList());
-  }
+  });
 }
 
 class MaterialAppWithTheme extends StatelessWidget {
@@ -36,14 +23,12 @@ class MaterialAppWithTheme extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Provider.of<ThemeChanger>(context);
 
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: new TodoList(),
       theme: theme.getTheme(),
     );
   }
-
 }
 
 class TodoList extends StatefulWidget {
@@ -52,33 +37,27 @@ class TodoList extends StatefulWidget {
 }
 
 class TodoListState extends State<TodoList> {
-
   List<String> _todoItems = [];
-
-
 
   @override
   Widget build(BuildContext context) {
     _getPrefs();
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Todo List'),
-      actions: <Widget>[
-      PopupMenuButton<String>(
-       onSelected: choiceAction ,
-        itemBuilder: (BuildContext context){
-         return Constants.choices.map((String choice){
-            return PopupMenuItem<String>(
-            value: choice,
-              child: Text(choice),
-            );
-         }).toList();
-        },
-      )
+      appBar: new AppBar(title: new Text('Список задач'), actions: <Widget>[
+        PopupMenuButton<String>(
+          onSelected: choiceAction,
+          itemBuilder: (BuildContext context) {
+            return Constants.choices.map((String choice) {
+              return PopupMenuItem<String>(
+                value: choice,
+                child: Text(choice),
+              );
+            }).toList();
+          },
+        )
       ]),
       body: _buildTodoList(),
-
       floatingActionButton: new FloatingActionButton(
-          backgroundColor: Colors.blue,
           onPressed: _addTodoItem,
           tooltip: 'Add task',
           child: new Icon(Icons.add)),
@@ -91,71 +70,54 @@ class TodoListState extends State<TodoList> {
         return _buildTodoItem(_todoItems[index], index);
       }
     });
-
-
-
   }
- void choiceAction(String choice){
-    if (choice == Constants.ChangeTheme){
+
+  void choiceAction(String choice) {
+    if (choice == Constants.ChangeTheme) {
       _changeTheme();
-
-
-    } else if (choice == Constants.OffAd){
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return new AlertDialog(
-                title: new Text('Хочешь отключить рекламу?\n\n'
-                    'Разработчку и дизайнеру тоже хочеца кушатб, '
-                    'поэтому для отключения рекламы отправь деняк. '),
-                actions: <Widget>[
-                  new FlatButton(
-                      child: new Text('подробнее'),
-                      onPressed: () => Navigator.of(context).pop()),
-                  new FlatButton(
-                      child: new Text('нет я жмот'),
-                      onPressed: () => Navigator.of(context).pop()),
-                ]);
-          });
-
-
-    } else if (choice == Constants.info){
+    }
+//    else if (choice == Constants.OffAd) {
+//      showDialog(
+//          context: context,
+//          builder: (BuildContext context) {
+//            return new AlertDialog(
+//                title: new Text('Хочешь отключить рекламу?\n\n'
+//                    'Разработчку и дизайнеру тоже хочеца кушатб, '
+//                    'поэтому для отключения рекламы отправь деняк. '),
+//                actions: <Widget>[
+//                  new FlatButton(
+//                      child: new Text('подробнее'),
+//                      onPressed: () => Navigator.of(context).pop()),
+//                  new FlatButton(
+//                      child: new Text('нет я жмот'),
+//                      onPressed: () => Navigator.of(context).pop()),
+//                ]);
+//          });
+//    }
+    else if (choice == Constants.info) {
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return new AlertDialog(
                 title: new Text('Todo\n'
-                                'Разбработчик: motiktoliika@gmail.com \n'
-                                'Дизайнер: misha_k_2018@mail.ru \n'
-                                ),
-
-
-
+                    'Разбработчик: matvey.k@protonmail.com \n'
+                    'Дизайнер:  \n'),
                 actions: <Widget>[
                   new FlatButton(
-                      child: new Text('оценить'),
+                      child: new Text('понятно'),
                       onPressed: () => Navigator.of(context).pop()),
-                  new FlatButton(
-                      child: new Text('отмена'),
-                      onPressed: () => Navigator.of(context).pop()),
+//                  new FlatButton(
+//                      child: new Text('отмена'),
+//                      onPressed: () => Navigator.of(context).pop()),
                 ]);
           });
-
     }
- }
+  }
 
- void _changeTheme(){
-   Navigator.push(context,
-       new MaterialPageRoute(
-           builder: (context) => new ChangeTheme()));
- }
-
-
-
-
-
-
-
+  void _changeTheme() {
+    Navigator.push(context,
+        new MaterialPageRoute(builder: (context) => new ChangeTheme()));
+  }
 
   Widget _buildTodoItem(String todoText, int index) {
     return new ListTile(
@@ -223,3 +185,4 @@ class TodoListState extends State<TodoList> {
       _todoItems = prefs.getStringList('TodoList');
   }
 }
+

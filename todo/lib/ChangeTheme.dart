@@ -1,65 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo/theme.dart';
 import 'package:provider/provider.dart';
 
 
-class ChangeTheme extends StatefulWidget{
-  ChangeTheme({Key key, this.title}): super(key: key);
+
+class ChangeTheme extends StatefulWidget {
+  ChangeTheme({Key key, this.title}) : super(key: key);
   final String title;
   @override
   MyState createState() => new MyState();
-
 }
 
-
-class MyState extends State<ChangeTheme>{
-  bool val = true;
+class MyState extends State<ChangeTheme> {
+  var _darkTheme = true;
   String message = "смена темы";
-
+  // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
 
+    final themeChanger = Provider.of<ThemeChanger>(context);
+    _darkTheme = (themeChanger.getTheme() == ThemeData.dark());
     return new Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: Text('Настройки'),
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            new Switch(
+              value: _darkTheme,
+              onChanged: (val) {
+                setState(() {
+                  _darkTheme = val;
+                });
+                onThemeChanged(val, themeChanger);
+              },
+            ),
+            new Text(message),
+          ],
         ),
-        body: Container(
-      child: Column(
-        children: <Widget>[
-         new Switch(
-           value: val,
-           onChanged: (bool e) => something(e),
-           activeColor: Colors.green
-          ),
-          new Text (message),
-        ],
       ),
-      ),
-      );
-
+    );
   }
 
- void something(bool e) {
-   ThemeChanger _themeChanger = Provider.of<ThemeChanger>(context);
-    setState(() {
-      if (e){
-        _themeChanger.setTheme(ThemeData.dark());
-        message = "Темнаяя тема";
-        val = e;
-      } else {
-        _themeChanger.setTheme(ThemeData.light());
-        message = "Светлая тема";
-        val = e;
-      }
-    });
- }
+  void onThemeChanged(bool value, ThemeChanger themeChanger) async {
+    (value)
+        ? themeChanger.setTheme(ThemeData.dark())
+        : themeChanger.setTheme(ThemeData.light());
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setBool('darkMode', value);
+  }
 
 
 }
 
 
-//class ChangeTheme extends StatelessWidget{
+
+//class th extends StatelessWidget{
 //  @override
 //  Widget build(BuildContext context) {
 //    ThemeChanger _themeChanger = Provider.of<ThemeChanger>(context);
